@@ -303,15 +303,16 @@ function riskOpacity(risk) {
   return Math.max(0.22, Math.min(0.82, Number(risk || 0) / 100));
 }
 
-// CARTO tile basemaps — clean, low-chroma so the diffusion dots stay legible.
-const TILE_LIGHT = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png";
-const TILE_DARK = "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
-const TILE_ATTR =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+// Esri Canvas basemaps — clean, low-chroma so the diffusion dots stay legible.
+// (CARTO's basemaps started serving "API KEY REQUIRED" tiles in Oct 2026.)
+const ESRI_CANVAS = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+const TILE_LIGHT = ESRI_CANVAS + "World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const TILE_DARK = ESRI_CANVAS + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const TILE_ATTR = 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors';
 let tileLayer = null;
 let labelLayer = null;
-const LABEL_LIGHT = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png";
-const LABEL_DARK = "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
+const LABEL_LIGHT = ESRI_CANVAS + "World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
+const LABEL_DARK = ESRI_CANVAS + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}";
 
 function isDark() {
   return document.documentElement.getAttribute("data-theme") === "dark";
@@ -332,10 +333,10 @@ function setupMap() {
   map.attributionControl.setPrefix("");
 
   tileLayer = L.tileLayer(isDark() ? TILE_DARK : TILE_LIGHT, {
-    attribution: TILE_ATTR, subdomains: "abcd", maxZoom: MAX_ZOOM, detectRetina: true,
+    attribution: TILE_ATTR, maxZoom: MAX_ZOOM, maxNativeZoom: 16, detectRetina: true,
   }).addTo(map);
   labelLayer = L.tileLayer(isDark() ? LABEL_DARK : LABEL_LIGHT, {
-    subdomains: "abcd", maxZoom: MAX_ZOOM, detectRetina: true, pane: "shadowPane",
+    maxZoom: MAX_ZOOM, maxNativeZoom: 16, detectRetina: true, pane: "shadowPane",
   }).addTo(map);
 
   // Expose for the shared fullscreen module (map-fullscreen.js) so it can call
